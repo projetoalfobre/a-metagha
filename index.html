@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Metadados HGIS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        h2 {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="email"], input[type="url"], input[type="number"], 
+        textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 80px;
+        }
+        .help-text {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 3px;
+        }
+        .multi-field {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background: #fff;
+        }
+        .multi-field-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+        }
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        .actions {
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .bbox-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .bbox-field {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>A-EMGHA</h1>
+		<h4>Editor Metadados para Geodados de História e Arqueologia (do projeto Alfobre)</h4>
+        
+        <div class="actions">
+            <div>
+                <label for="filename">Nome do ficheiro:</label>
+                <input type="text" id="filename" placeholder="metadados_hgis">
+            </div>
+            <div>
+                <button id="loadBtn">Carregar JSON</button>
+                <button id="exportJsonBtn">Exportar JSON</button>
+                <button id="exportXmlBtn">Exportar XML</button>
+                <button id="exportCsvBtn">Exportar CSV</button>
+            </div>
+        </div>
+        
+        <input type="file" id="fileInput" style="display: none;" accept=".json">
+
+	</div>
+    <div class="container" style="margin-top:2em;">        
+        <form id="metadataForm">
+            <h2>1. Informação Geral</h2>
+            
+            <div class="form-group">
+                <label for="title">Título</label>
+                <input type="text" id="title" required>
+                <div class="help-text">Título descritivo do conjunto de dados geográficos.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="author">Autor</label>
+                <input type="text" id="author" required>
+                <div class="help-text">Pessoa ou organização responsável pela criação dos dados.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="abstract">Resumo</label>
+                <textarea id="abstract" required></textarea>
+                <div class="help-text">Descrição concisa do conteúdo e propósito do conjunto de dados.</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Palavras-chave</label>
+                <div id="keywords-container">
+                    <div class="multi-field">
+                        <input type="text" class="keyword" placeholder="Palavra-chave">
+                    </div>
+                </div>
+                <button type="button" id="addKeywordBtn" class="btn-success">+ Adicionar palavra-chave</button>
+                <div class="help-text">Termos que descrevem o conteúdo do conjunto de dados.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="inspireTheme">Categoria temática (INSPIRE)</label>
+                <select id="inspireTheme" required>
+                    <option value="">Selecione...</option>
+                    <option value="Sistemas de referência">Sistemas de referência</option>
+                    <option value="Sistemas de grade">Sistemas de grade</option>
+                    <option value="Nomes geográficos">Nomes geográficos</option>
+                    <option value="Unidades administrativas">Unidades administrativas</option>
+                    <option value="Endereços">Endereços</option>
+                    <option value="Parcelas cadastrais">Parcelas cadastrais</option>
+                    <option value="Redes de transportes">Redes de transportes</option>
+                    <option value="Hidrografia">Hidrografia</option>
+                    <option value="Locais protegidos">Locais protegidos</option>
+                    <option value="Altimetria">Altimetria</option>
+                    <option value="Ocupação do solo">Ocupação do solo</option>
+                    <option value="Ortoimagens">Ortoimagens</option>
+                    <option value="Geologia">Geologia</option>
+                    <option value="Unidades estatísticas">Unidades estatísticas</option>
+                    <option value="Edifícios">Edifícios</option>
+                    <option value="Solo">Solo</option>
+                    <option value="Uso do solo">Uso do solo</option>
+                    <option value="Saúde humana e segurança">Saúde humana e segurança</option>
+                    <option value="Serviços de utilidade pública">Serviços de utilidade pública</option>
+                    <option value="Instalações de monitorização ambiental">Instalações de monitorização ambiental</option>
+                    <option value="Produção e instalações industriais">Produção e instalações industriais</option>
+                    <option value="Instalações agrícolas e aquícolas">Instalações agrícolas e aquícolas</option>
+                    <option value="Distribuição da população">Distribuição da população</option>
+                    <option value="Zonas de gestão/restrição/regulamentação e unidades de reporte">Zonas de gestão/restrição/regulamentação e unidades de reporte</option>
+                    <option value="Zonas com risco natural">Zonas com risco natural</option>
+                    <option value="Condições atmosféricas">Condições atmosféricas</option>
+                    <option value="Características geográficas meteorológicas">Características geográficas meteorológicas</option>
+                    <option value="Características geográficas oceanográficas">Características geográficas oceanográficas</option>
+                    <option value="Regiões marinhas">Regiões marinhas</option>
+                    <option value="Regiões biogeográficas">Regiões biogeográficas</option>
+                    <option value="Habitats e biótopos">Habitats e biótopos</option>
+                    <option value="Distribuição de espécies">Distribuição de espécies</option>
+                    <option value="Recursos energéticos">Recursos energéticos</option>
+                    <option value="Recursos minerais">Recursos minerais</option>
+                </select>
+                <div class="help-text">Tema INSPIRE que melhor descreve o conjunto de dados.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="version">Versão</label>
+                <input type="text" id="version" placeholder="1.0" required>
+                <div class="help-text">Versão ou edição do conjunto de dados.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="language">Idioma</label>
+                <select id="language" required>
+                    <option value="por">Português</option>
+                    <option value="eng">Inglês</option>
+                    <option value="spa">Espanhol</option>
+                    <option value="fra">Francês</option>
+                    <option value="deu">Alemão</option>
+                    <option value="other">Outro</option>
+                </select>
+                <div class="help-text">Idioma principal dos metadados e dos dados.</div>
+            </div>
+    </div>        
+    <div class="container" style="margin-top:2em;">
+            <h2>2. Informação Histórica</h2>
+            
+            <div class="form-group">
+                <label for="historicalPeriod">Período histórico</label>
+                <input type="text" id="historicalPeriod" required>
+                <div class="help-text">Período histórico coberto pelos dados (ex: "Idade Média", "Século XIX").</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="temporalCoverage">Cobertura temporal</label>
+                <input type="text" id="temporalCoverage" placeholder="YYYY/YYYY" required>
+                <div class="help-text">Intervalo temporal coberto pelos dados no formato ano inicial/ano final (ex: "1500/1600").</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="hgisTheme">Categoria temática (HGIS)</label>
+                <input type="text" id="hgisTheme" required>
+                <div class="help-text">Tema específico de História ou HGIS que descreve o conteúdo (ex: "Demografia histórica", "Uso do solo histórico").</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confidenceLevel">Nível de confiança/fiabilidade</label>
+                <select id="confidenceLevel" required>
+                    <option value="Alta certeza">Alta certeza</option>
+                    <option value="Média certeza">Média certeza</option>
+                    <option value="Baixa certeza">Baixa certeza</option>
+                </select>
+                <div class="help-text">
+                    <p><strong>Alta certeza:</strong> Dados provenientes de documentos originais ou medições arqueológicas confiáveis.</p>
+                    <p><strong>Média certeza:</strong> Fontes indiretas, textos antigos ambíguos ou interpretações parciais.</p>
+                    <p><strong>Baixa certeza:</strong> Hipóteses, reconstruções especulativas ou fontes pouco confiáveis.</p>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="historicalNotes">Observações</label>
+                <textarea id="historicalNotes"></textarea>
+                <div class="help-text">Notas adicionais sobre a natureza histórica dos dados, limitações ou considerações especiais.</div>
+            </div>
+    </div>        
+    <div class="container" style="margin-top:2em;">
+            <h2>3. Informação Espacial</h2>
+            
+            <div class="form-group">
+                <label for="crs">Sistema de Referência de Coordenadas (CRS)</label>
+                <input type="text" id="crs" placeholder="EPSG:4326" required>
+                <div class="help-text">Sistema de referência espacial usado pelos dados (ex: "EPSG:4326" para WGS84).</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="regionName">Nome da região ou área</label>
+                <input type="text" id="regionName" required>
+                <div class="help-text">Nome geográfico da área coberta pelos dados.</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Bounding Box (Extensão espacial)</label>
+                <div class="bbox-fields">
+                    <div class="bbox-field">
+                        <label for="westBoundLongitude">Oeste (Longitude)</label>
+                        <input type="number" id="westBoundLongitude" step="0.000001" required>
+                    </div>
+                    <div class="bbox-field">
+                        <label for="eastBoundLongitude">Este (Longitude)</label>
+                        <input type="number" id="eastBoundLongitude" step="0.000001" required>
+                    </div>
+                    <div class="bbox-field">
+                        <label for="southBoundLatitude">Sul (Latitude)</label>
+                        <input type="number" id="southBoundLatitude" step="0.000001" required>
+                    </div>
+                    <div class="bbox-field">
+                        <label for="northBoundLatitude">Norte (Latitude)</label>
+                        <input type="number" id="northBoundLatitude" step="0.000001" required>
+                    </div>
+                </div>
+                <div class="help-text">Extensão geográfica dos dados em coordenadas decimais.</div>
+            </div>
+    </div>        
+    <div class="container" style="margin-top:2em;">
+            <h2>4. Origem e Qualidade dos Dados</h2>
+            
+            <div class="form-group">
+                <label for="methodology">Metodologia de recolha</label>
+                <textarea id="methodology" required></textarea>
+                <div class="help-text">Descrição dos métodos usados para recolher ou produzir os dados.</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Fontes dos dados</label>
+                <div id="sources-container">
+                    <div class="multi-field">
+                        <input type="text" class="source" placeholder="Fonte dos dados" required>
+                    </div>
+                </div>
+                <button type="button" id="addSourceBtn" class="btn-success">+ Adicionar fonte</button>
+                <div class="help-text">Fontes originais dos dados (documentos, arquivos, coleções, etc.).</div>
+            </div>
+    </div>        
+    <div class="container" style="margin-top:2em;">
+            <h2>5. Distribuição</h2>
+            
+            <div class="form-group">
+                <label for="fileFormat">Formato de ficheiro</label>
+                <input type="text" id="fileFormat" placeholder="Shapefile, GeoJSON, etc." required>
+                <div class="help-text">Formatos disponíveis para distribuição dos dados.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="license">Licença</label>
+                <input type="text" id="license" placeholder="CC BY 4.0" required>
+                <div class="help-text">Licença sob a qual os dados são disponibilizados.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="doi">DOI (Identificador Digital de Objeto)</label>
+                <input type="text" id="doi" placeholder="10.xxxx/xxxxx">
+                <div class="help-text">Identificador persistente para citação dos dados.</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Links online</label>
+                <div id="links-container">
+                    <div class="multi-field">
+                        <input type="url" class="link" placeholder="https://...">
+                    </div>
+                </div>
+                <button type="button" id="addLinkBtn" class="btn-success">+ Adicionar link</button>
+                <div class="help-text">URLs onde os dados podem ser acedidos ou descarregados.</div>
+            </div>
+    </div>        
+    <div class="container" style="margin-top:2em;"> 
+           <h2>6. Responsável e Contactos</h2>
+            
+            <div id="contacts-container">
+                <div class="multi-field">
+                    <div class="multi-field-header">
+                        <h3>Responsável 1</h3>
+                        <button type="button" class="removeContactBtn btn-danger">Remover</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <input type="text" class="contactName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Organização</label>
+                        <input type="text" class="contactOrg">
+                    </div>
+                    <div class="form-group">
+                        <label>Papel/Função</label>
+                        <input type="text" class="contactRole" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="contactEmail" required>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" id="addContactBtn" class="btn-success">+ Adicionar responsável</button>
+            
+            <div class="actions">
+                <button type="button" id="resetBtn" class="btn-danger">Limpar formulário</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="container" style="margin-top:2em;">
+	footer
+	</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Contadores para campos múltiplos
+            let keywordCount = 1;
+            let sourceCount = 1;
+            let linkCount = 1;
+            let contactCount = 1;
+            
+            // Adicionar campo de palavra-chave
+            document.getElementById('addKeywordBtn').addEventListener('click', function() {
+                keywordCount++;
+                const container = document.getElementById('keywords-container');
+                const div = document.createElement('div');
+                div.className = 'multi-field';
+                div.innerHTML = `
+                    <input type="text" class="keyword" placeholder="Palavra-chave">
+                    <button type="button" class="removeFieldBtn btn-danger">Remover</button>
+                `;
+                container.appendChild(div);
+                
+                div.querySelector('.removeFieldBtn').addEventListener('click', function() {
+                    container.removeChild(div);
+                });
+            });
+            
+            // Adicionar fonte de dados
+            document.getElementById('addSourceBtn').addEventListener('click', function() {
+                sourceCount++;
+                const container = document.getElementById('sources-container');
+                const div = document.createElement('div');
+                div.className = 'multi-field';
+                div.innerHTML = `
+                    <input type="text" class="source" placeholder="Fonte dos dados" required>
+                    <button type="button" class="removeFieldBtn btn-danger">Remover</button>
+                `;
+                container.appendChild(div);
+                
+                div.querySelector('.removeFieldBtn').addEventListener('click', function() {
+                    container.removeChild(div);
+                });
+            });
+            
+            // Adicionar link online
+            document.getElementById('addLinkBtn').addEventListener('click', function() {
+                linkCount++;
+                const container = document.getElementById('links-container');
+                const div = document.createElement('div');
+                div.className = 'multi-field';
+                div.innerHTML = `
+                    <input type="url" class="link" placeholder="https://...">
+                    <button type="button" class="removeFieldBtn btn-danger">Remover</button>
+                `;
+                container.appendChild(div);
+                
+                div.querySelector('.removeFieldBtn').addEventListener('click', function() {
+                    container.removeChild(div);
+                });
+            });
+            
+            // Adicionar responsável
+            document.getElementById('addContactBtn').addEventListener('click', function() {
+                contactCount++;
+                const container = document.getElementById('contacts-container');
+                const div = document.createElement('div');
+                div.className = 'multi-field';
+                div.innerHTML = `
+                    <div class="multi-field-header">
+                        <h3>Responsável ${contactCount}</h3>
+                        <button type="button" class="removeContactBtn btn-danger">Remover</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <input type="text" class="contactName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Organização</label>
+                        <input type="text" class="contactOrg">
+                    </div>
+                    <div class="form-group">
+                        <label>Papel/Função</label>
+                        <input type="text" class="contactRole" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="contactEmail" required>
+                    </div>
+                `;
+                container.appendChild(div);
+                
+                div.querySelector('.removeContactBtn').addEventListener('click', function() {
+                    container.removeChild(div);
+                });
+            });
+            
+            // Limpar formulário
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                if (confirm('Tem a certeza que deseja limpar todos os dados do formulário?')) {
+                    document.getElementById('metadataForm').reset();
+                    
+                    // Limpar campos múltiplos
+                    document.getElementById('keywords-container').innerHTML = `
+                        <div class="multi-field">
+                            <input type="text" class="keyword" placeholder="Palavra-chave">
+                        </div>
+                    `;
+                    
+                    document.getElementById('sources-container').innerHTML = `
+                        <div class="multi-field">
+                            <input type="text" class="source" placeholder="Fonte dos dados" required>
+                        </div>
+                    `;
+                    
+                    document.getElementById('links-container').innerHTML = `
+                        <div class="multi-field">
+                            <input type="url" class="link" placeholder="https://...">
+                        </div>
+                    `;
+                    
+                    document.getElementById('contacts-container').innerHTML = `
+                        <div class="multi-field">
+                            <div class="multi-field-header">
+                                <h3>Responsável 1</h3>
+                                <button type="button" class="removeContactBtn btn-danger">Remover</button>
+                            </div>
+                            <div class="form-group">
+                                <label>Nome</label>
+                                <input type="text" class="contactName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Organização</label>
+                                <input type="text" class="contactOrg">
+                            </div>
+                            <div class="form-group">
+                                <label>Papel/Função</label>
+                                <input type="text" class="contactRole" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" class="contactEmail" required>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Reset counters
+                    keywordCount = 1;
+                    sourceCount = 1;
+                    linkCount = 1;
+                    contactCount = 1;
+                }
+            });
+            
+            // Carregar JSON
+            document.getElementById('loadBtn').addEventListener('click', function() {
+                document.getElementById('fileInput').click();
+            });
+            
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        loadDataIntoForm(data);
+                    } catch (error) {
+                        alert('Erro ao ler o ficheiro JSON: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            });
+            
+function loadDataIntoForm(data) {
+    // Limpar formulário primeiro
+    document.getElementById('resetBtn').click();
+    
+    // Preencher campos simples
+    if (data.title) document.getElementById('title').value = data.title;
+    if (data.author) document.getElementById('author').value = data.author;
+    if (data.abstract) document.getElementById('abstract').value = data.abstract;
+    if (data.inspireTheme) document.getElementById('inspireTheme').value = data.inspireTheme;
+    if (data.version) document.getElementById('version').value = data.version;
+    if (data.language) document.getElementById('language').value = data.language;
+    if (data.historicalPeriod) document.getElementById('historicalPeriod').value = data.historicalPeriod;
+    if (data.temporalCoverage) document.getElementById('temporalCoverage').value = data.temporalCoverage;
+    if (data.hgisTheme) document.getElementById('hgisTheme').value = data.hgisTheme;
+    if (data.confidenceLevel) document.getElementById('confidenceLevel').value = data.confidenceLevel;
+    if (data.historicalNotes) document.getElementById('historicalNotes').value = data.historicalNotes;
+    if (data.crs) document.getElementById('crs').value = data.crs;
+    if (data.regionName) document.getElementById('regionName').value = data.regionName;
+    if (data.bbox) {
+        if (data.bbox.west) document.getElementById('westBoundLongitude').value = data.bbox.west;
+        if (data.bbox.east) document.getElementById('eastBoundLongitude').value = data.bbox.east;
+        if (data.bbox.south) document.getElementById('southBoundLatitude').value = data.bbox.south;
+        if (data.bbox.north) document.getElementById('northBoundLatitude').value = data.bbox.north;
+    }
+    if (data.methodology) document.getElementById('methodology').value = data.methodology;
+    if (data.fileFormat) document.getElementById('fileFormat').value = data.fileFormat;
+    if (data.license) document.getElementById('license').value = data.license;
+    if (data.doi) document.getElementById('doi').value = data.doi;
+    
+    // Preencher campos múltiplos (palavras-chave)
+    if (data.keywords && data.keywords.length > 0) {
+        document.querySelector('.keyword').value = data.keywords[0] || '';
+        for (let i = 1; i < data.keywords.length; i++) {
+            document.getElementById('addKeywordBtn').click();
+            const keywordFields = document.querySelectorAll('.keyword');
+            if (keywordFields[i]) {
+                keywordFields[i].value = data.keywords[i] || '';
+            }
+        }
+    }
+    
+    // Preencher fontes
+    if (data.sources && data.sources.length > 0) {
+        document.querySelector('.source').value = data.sources[0] || '';
+        for (let i = 1; i < data.sources.length; i++) {
+            document.getElementById('addSourceBtn').click();
+            const sourceFields = document.querySelectorAll('.source');
+            if (sourceFields[i]) {
+                sourceFields[i].value = data.sources[i] || '';
+            }
+        }
+    }
+    
+    // Preencher links
+    if (data.links && data.links.length > 0) {
+        document.querySelector('.link').value = data.links[0] || '';
+        for (let i = 1; i < data.links.length; i++) {
+            document.getElementById('addLinkBtn').click();
+            const linkFields = document.querySelectorAll('.link');
+            if (linkFields[i]) {
+                linkFields[i].value = data.links[i] || '';
+            }
+        }
+    }
+    
+    // Preencher contactos - versão mais robusta
+    if (data.contacts && data.contacts.length > 0) {
+        // Primeiro garante que temos pelo menos um campo de contato
+        const initialContactFields = document.querySelector('#contacts-container .multi-field');
+        
+        // Preenche o primeiro contato se existir
+        if (initialContactFields && data.contacts[0]) {
+            const firstContact = data.contacts[0];
+            if (firstContact.name) initialContactFields.querySelector('.contactName').value = firstContact.name;
+            if (firstContact.organization) initialContactFields.querySelector('.contactOrg').value = firstContact.organization;
+            if (firstContact.role) initialContactFields.querySelector('.contactRole').value = firstContact.role;
+            if (firstContact.email) initialContactFields.querySelector('.contactEmail').value = firstContact.email;
+        }
+        
+        // Adiciona os contatos adicionais
+        for (let i = 1; i < data.contacts.length; i++) {
+            document.getElementById('addContactBtn').click();
+            const contactFields = document.querySelectorAll('#contacts-container .multi-field');
+            const currentField = contactFields[contactFields.length - 1]; // Pega o último adicionado
+            
+            if (currentField && data.contacts[i]) {
+                const contact = data.contacts[i];
+                if (contact.name) currentField.querySelector('.contactName').value = contact.name;
+                if (contact.organization) currentField.querySelector('.contactOrg').value = contact.organization;
+                if (contact.role) currentField.querySelector('.contactRole').value = contact.role;
+                if (contact.email) currentField.querySelector('.contactEmail').value = contact.email;
+            }
+        }
+    }
+    
+    // Definir nome do ficheiro se existir nos dados
+    if (data.filename) {
+        document.getElementById('filename').value = data.filename;
+    }
+}
+            
+            // Exportar JSON
+            document.getElementById('exportJsonBtn').addEventListener('click', function() {
+                const data = collectFormData();
+                const jsonStr = JSON.stringify(data, null, 2);
+                downloadFile(jsonStr, 'application/json', 'json');
+            });
+            
+            // Exportar XML
+            document.getElementById('exportXmlBtn').addEventListener('click', function() {
+                const data = collectFormData();
+                const xmlStr = jsonToXml(data);
+                downloadFile(xmlStr, 'application/xml', 'xml');
+            });
+            
+            // Exportar CSV
+            document.getElementById('exportCsvBtn').addEventListener('click', function() {
+                const data = collectFormData();
+                const csvStr = jsonToCsv(data);
+                downloadFile(csvStr, 'text/csv', 'csv');
+            });
+			
+			function collectFormData() {
+    // Garantir que valores numéricos da BBox são convertidos corretamente
+    const west = parseFloat(document.getElementById('westBoundLongitude').value) || 0;
+    const east = parseFloat(document.getElementById('eastBoundLongitude').value) || 0;
+    const south = parseFloat(document.getElementById('southBoundLatitude').value) || 0;
+    const north = parseFloat(document.getElementById('northBoundLatitude').value) || 0;
+
+    const data = {
+        filename: document.getElementById('filename').value || 'metadados_hgis',
+        title: document.getElementById('title').value,
+        author: document.getElementById('author').value,
+        abstract: document.getElementById('abstract').value,
+        keywords: Array.from(document.querySelectorAll('.keyword')).map(el => el.value).filter(val => val),
+        inspireTheme: document.getElementById('inspireTheme').value,
+        version: document.getElementById('version').value,
+        language: document.getElementById('language').value,
+        historicalPeriod: document.getElementById('historicalPeriod').value,
+        temporalCoverage: document.getElementById('temporalCoverage').value,
+        hgisTheme: document.getElementById('hgisTheme').value,
+        confidenceLevel: document.getElementById('confidenceLevel').value,
+        historicalNotes: document.getElementById('historicalNotes').value,
+        crs: document.getElementById('crs').value,
+        regionName: document.getElementById('regionName').value,
+        bbox: {
+            west: west,
+            east: east,
+            south: south,
+            north: north
+        },
+        methodology: document.getElementById('methodology').value,
+        sources: Array.from(document.querySelectorAll('.source')).map(el => el.value).filter(val => val),
+        fileFormat: document.getElementById('fileFormat').value,
+        license: document.getElementById('license').value,
+        doi: document.getElementById('doi').value,
+        links: Array.from(document.querySelectorAll('.link')).map(el => el.value).filter(val => val),
+        contacts: Array.from(document.querySelectorAll('#contacts-container .multi-field')).map(field => ({
+            name: field.querySelector('.contactName').value,
+            organization: field.querySelector('.contactOrg').value,
+            role: field.querySelector('.contactRole').value,
+            email: field.querySelector('.contactEmail').value
+        })).filter(contact => contact.name || contact.organization || contact.role || contact.email)
+    };
+    
+    return data;
+}
+            
+            
+            function jsonToXml(json) {
+                let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<metadata>\n';
+                
+                // Campos simples
+                xml += `  <title>${escapeXml(json.title)}</title>\n`;
+                xml += `  <author>${escapeXml(json.author)}</author>\n`;
+                xml += `  <abstract>${escapeXml(json.abstract)}</abstract>\n`;
+                xml += `  <inspireTheme>${escapeXml(json.inspireTheme)}</inspireTheme>\n`;
+                xml += `  <version>${escapeXml(json.version)}</version>\n`;
+                xml += `  <language>${escapeXml(json.language)}</language>\n`;
+                
+                // Informação histórica
+                xml += '  <historicalInformation>\n';
+                xml += `    <historicalPeriod>${escapeXml(json.historicalPeriod)}</historicalPeriod>\n`;
+                xml += `    <temporalCoverage>${escapeXml(json.temporalCoverage)}</temporalCoverage>\n`;
+                xml += `    <hgisTheme>${escapeXml(json.hgisTheme)}</hgisTheme>\n`;
+                xml += `    <confidenceLevel>${escapeXml(json.confidenceLevel)}</confidenceLevel>\n`;
+                xml += `    <historicalNotes>${escapeXml(json.historicalNotes)}</historicalNotes>\n`;
+                xml += '  </historicalInformation>\n';
+                
+                // Informação espacial
+                xml += '  <spatialInformation>\n';
+                xml += `    <crs>${escapeXml(json.crs)}</crs>\n`;
+                xml += `    <regionName>${escapeXml(json.regionName)}</regionName>\n`;
+                xml += '    <bbox>\n';
+                xml += `      <west>${json.bbox.west}</west>\n`;
+                xml += `      <east>${json.bbox.east}</east>\n`;
+                xml += `      <south>${json.bbox.south}</south>\n`;
+                xml += `      <north>${json.bbox.north}</north>\n`;
+                xml += '    </bbox>\n';
+                xml += '  </spatialInformation>\n';
+                
+                // Origem e qualidade
+                xml += '  <dataQuality>\n';
+                xml += `    <methodology>${escapeXml(json.methodology)}</methodology>\n`;
+                xml += '    <sources>\n';
+                json.sources.forEach(source => {
+                    xml += `      <source>${escapeXml(source)}</source>\n`;
+                });
+                xml += '    </sources>\n';
+                xml += '  </dataQuality>\n';
+                
+                // Distribuição
+                xml += '  <distribution>\n';
+                xml += `    <fileFormat>${escapeXml(json.fileFormat)}</fileFormat>\n`;
+                xml += `    <license>${escapeXml(json.license)}</license>\n`;
+                xml += `    <doi>${escapeXml(json.doi)}</doi>\n`;
+                xml += '    <links>\n';
+                json.links.forEach(link => {
+                    xml += `      <link>${escapeXml(link)}</link>\n`;
+                });
+                xml += '    </links>\n';
+                xml += '  </distribution>\n';
+                
+                // Contactos
+                xml += '  <contacts>\n';
+                json.contacts.forEach(contact => {
+                    xml += '    <contact>\n';
+                    xml += `      <name>${escapeXml(contact.name)}</name>\n`;
+                    xml += `      <organization>${escapeXml(contact.organization)}</organization>\n`;
+                    xml += `      <role>${escapeXml(contact.role)}</role>\n`;
+                    xml += `      <email>${escapeXml(contact.email)}</email>\n`;
+                    xml += '    </contact>\n';
+                });
+                xml += '  </contacts>\n';
+                
+                // Palavras-chave
+                xml += '  <keywords>\n';
+                json.keywords.forEach(keyword => {
+                    xml += `    <keyword>${escapeXml(keyword)}</keyword>\n`;
+                });
+                xml += '  </keywords>\n';
+                
+                xml += '</metadata>';
+                return xml;
+            }
+            
+            function escapeXml(unsafe) {
+                if (!unsafe) return '';
+                return unsafe.toString()
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&apos;');
+            }
+            
+            function jsonToCsv(json) {
+                let csv = 'Campo,Valor\n';
+                
+                // Campos simples
+                csv += `Título,${escapeCsv(json.title)}\n`;
+                csv += `Autor,${escapeCsv(json.author)}\n`;
+                csv += `Resumo,${escapeCsv(json.abstract)}\n`;
+                csv += `Tema INSPIRE,${escapeCsv(json.inspireTheme)}\n`;
+                csv += `Versão,${escapeCsv(json.version)}\n`;
+                csv += `Idioma,${escapeCsv(json.language)}\n`;
+                
+                // Informação histórica
+                csv += `Período histórico,${escapeCsv(json.historicalPeriod)}\n`;
+                csv += `Cobertura temporal,${escapeCsv(json.temporalCoverage)}\n`;
+                csv += `Tema HGIS,${escapeCsv(json.hgisTheme)}\n`;
+                csv += `Nível de confiança,${escapeCsv(json.confidenceLevel)}\n`;
+                csv += `Observações históricas,${escapeCsv(json.historicalNotes)}\n`;
+                
+                // Informação espacial
+                csv += `Sistema de referência (CRS),${escapeCsv(json.crs)}\n`;
+                csv += `Nome da região,${escapeCsv(json.regionName)}\n`;
+                csv += `BBox Oeste,${json.bbox.west}\n`;
+                csv += `BBox Este,${json.bbox.east}\n`;
+                csv += `BBox Sul,${json.bbox.south}\n`;
+                csv += `BBox Norte,${json.bbox.north}\n`;
+                
+                // Origem e qualidade
+                csv += `Metodologia,${escapeCsv(json.methodology)}\n`;
+                
+                // Fontes (múltiplas)
+                json.sources.forEach((source, i) => {
+                    csv += `Fonte ${i+1},${escapeCsv(source)}\n`;
+                });
+                
+                // Distribuição
+                csv += `Formato de ficheiro,${escapeCsv(json.fileFormat)}\n`;
+                csv += `Licença,${escapeCsv(json.license)}\n`;
+                csv += `DOI,${escapeCsv(json.doi)}\n`;
+                
+                // Links (múltiplos)
+                json.links.forEach((link, i) => {
+                    csv += `Link ${i+1},${escapeCsv(link)}\n`;
+                });
+                
+                // Palavras-chave (múltiplas)
+                json.keywords.forEach((keyword, i) => {
+                    csv += `Palavra-chave ${i+1},${escapeCsv(keyword)}\n`;
+                });
+                
+                // Contactos (múltiplos)
+                json.contacts.forEach((contact, i) => {
+                    csv += `Responsável ${i+1} Nome,${escapeCsv(contact.name)}\n`;
+                    csv += `Responsável ${i+1} Organização,${escapeCsv(contact.organization)}\n`;
+                    csv += `Responsável ${i+1} Função,${escapeCsv(contact.role)}\n`;
+                    csv += `Responsável ${i+1} Email,${escapeCsv(contact.email)}\n`;
+                });
+                
+                return csv;
+            }
+            
+            function escapeCsv(str) {
+                if (!str) return '';
+                return `"${str.toString().replace(/"/g, '""')}"`;
+            }
+            
+            function downloadFile(content, mimeType, extension) {
+                const filename = document.getElementById('filename').value || 'metadados_hgis';
+                const blob = new Blob([content], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${filename}.${extension}`;
+                document.body.appendChild(a);
+                a.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>
